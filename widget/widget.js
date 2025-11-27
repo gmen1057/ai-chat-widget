@@ -314,12 +314,28 @@
     .ai-chat-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
     @media (max-width: 480px) {
+      .ai-chat-widget {
+        bottom: 10px !important;
+        right: 10px !important;
+        left: auto !important;
+      }
+      .ai-chat-toggle {
+        width: 50px;
+        height: 50px;
+      }
       .ai-chat-window {
-        width: calc(100vw - 40px);
-        height: 60vh;
-        right: 0;
-        left: 0;
-        margin: 0 auto;
+        position: fixed !important;
+        bottom: 70px !important;
+        right: 10px !important;
+        left: 10px !important;
+        width: auto !important;
+        height: 70vh;
+        max-height: calc(100vh - 90px);
+        border-radius: 12px;
+      }
+      .ai-chat-widget.bottom-left .ai-chat-window {
+        right: 10px !important;
+        left: 10px !important;
       }
     }
   `;

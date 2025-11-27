@@ -45,3 +45,4 @@ Thumbs.db
 # Test files
 *.test.json
 test_*.sh
+HABR_ARTICLE_DATA.md
