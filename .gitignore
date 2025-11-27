@@ -1,0 +1,47 @@
+# Environment files with secrets
+backend/.env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Data files (user chat history)
+backend/data/*.json
+backend/data/*.db
+data/*.json
+data/*.db
+!data/.gitkeep
+!backend/data/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Test files
+*.test.json
+test_*.sh

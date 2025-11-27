@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  chatbot:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      # AI Provider (REQUIRED)
+      - AI_BASE_URL=${AI_BASE_URL}
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_MODEL=${AI_MODEL:-gpt-4o-mini}
+      - AI_TEMPERATURE=${AI_TEMPERATURE:-0.7}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS:-1000}
+      # GigaChat specific (for auto token refresh)
+      - GIGACHAT_CREDENTIALS=${GIGACHAT_CREDENTIALS:-}
+      # YandexGPT specific
+      - YANDEX_FOLDER_ID=${YANDEX_FOLDER_ID:-}
+
+      # Storage
+      - STORAGE_TYPE=${STORAGE_TYPE:-json}
+      - DATABASE_URL=${DATABASE_URL:-}
+
+      # Telegram (optional)
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+
+      # Security (optional)
+      - MAX_MESSAGE_LENGTH=${MAX_MESSAGE_LENGTH:-5000}
+      - MAX_REQUESTS_PER_MINUTE=${MAX_REQUESTS_PER_MINUTE:-20}
+      - MAX_REQUESTS_PER_HOUR=${MAX_REQUESTS_PER_HOUR:-100}
+
+      # Server
+      - PORT=8080
+      - DEBUG=${DEBUG:-false}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - ./data:/app/data
+      - ./knowledge:/app/knowledge
+    restart: unless-stopped
+
+  # Optional: PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: chatbot
+      POSTGRES_USER: chatbot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - postgres
+
+volumes:
+  postgres_data:
