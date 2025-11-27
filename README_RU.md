@@ -284,4 +284,4 @@ MIT License — используйте как хотите.
 ## Поддержка
 
 - Issues: [GitHub Issues](https://github.com/gmen1057/ai-chat-widget/issues)
-- Telegram: [@gmen1057](https://t.me/gmen1057)
+- Telegram: [@bzc_e](https://t.me/bzc_e)
