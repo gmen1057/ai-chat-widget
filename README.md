@@ -6,6 +6,13 @@ Drop-in AI chat widget for any website. Works with OpenAI, Claude, Gemini, GigaC
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## Screenshots
+
+<div align="center">
+  <img src=".github/images/demo-pricing.png" alt="AI Assistant - Context-aware responses" width="45%"/>
+  <img src=".github/images/demo-chat.png" alt="AI Assistant - Chat interface" width="45%"/>
+</div>
+
 ## Features
 
 - **Page Context Awareness** - Bot sees the current page: URL, title, headings, content, selected text
