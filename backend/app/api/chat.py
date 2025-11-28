@@ -2,44 +2,15 @@
 
 import logging
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Optional, List
 from ..services.storage.base import Message
 from ..services.ai_service import ai_service
 from ..services.telegram import telegram_service
 from ..services.security import security_service
+from .schemas import PageContext, ChatRequest, ChatResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
-
-
-class PageContext(BaseModel):
-    """Page context from frontend."""
-
-    url: str = ""
-    title: str = ""
-    meta_description: Optional[str] = ""
-    headings: Optional[Dict[str, List[str]]] = {}
-    selected_text: Optional[str] = ""
-    main_content: Optional[str] = ""
-
-
-class ChatRequest(BaseModel):
-    """Chat message request."""
-
-    session_id: str
-    message: str
-    page_context: Optional[PageContext] = None
-
-
-class ChatResponse(BaseModel):
-    """Chat message response."""
-
-    reply: str
-    session_id: str
-    blocked: bool = False
-    attack_detected: Optional[str] = None
 
 
 @router.post("/message", response_model=ChatResponse)
