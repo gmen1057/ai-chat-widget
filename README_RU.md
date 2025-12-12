@@ -27,8 +27,14 @@
 ```bash
 git clone https://github.com/gmen1057/ai-chat-widget.git
 cd ai-chat-widget
+
+# Для Docker (рекомендуется):
+cp backend/.env.example .env
+
+# Для локальной разработки:
 cp backend/.env.example backend/.env
-# Отредактируйте backend/.env — добавьте API ключ
+
+# Отредактируйте .env — добавьте API ключ
 ```
 
 ### 2. Запустите через Docker (рекомендуется)
@@ -195,7 +201,7 @@ DATABASE_URL=postgresql://user:pass@localhost/chatbot
 ### Docker Compose
 
 ```bash
-cp backend/.env.example backend/.env
+cp backend/.env.example .env
 # Отредактируйте .env
 
 docker-compose up -d

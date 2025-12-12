@@ -34,8 +34,14 @@ Drop-in AI chat widget for any website. Works with OpenAI, Claude, Gemini, GigaC
 ```bash
 git clone https://github.com/gmen1057/ai-chat-widget.git
 cd ai-chat-widget
+
+# For Docker (recommended):
+cp backend/.env.example .env
+
+# For local development:
 cp backend/.env.example backend/.env
-# Edit backend/.env with your AI API key
+
+# Edit .env with your AI API key
 ```
 
 ### 2. Run with Docker (Recommended)
@@ -273,8 +279,8 @@ open demo.html
 
 ```bash
 # Configure
-cp backend/.env.example backend/.env
-# Edit backend/.env
+cp backend/.env.example .env
+# Edit .env with your settings
 
 # Deploy
 docker-compose up -d
