@@ -1,0 +1,153 @@
+name: Security Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  secrets-scan:
+    name: Scan for hardcoded secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for API keys and tokens
+        run: |
+          echo "🔍 Scanning for hardcoded secrets..."
+
+          # Patterns to detect (case insensitive)
+          PATTERNS=(
+            # API Keys (generic)
+            'api[_-]?key\s*[=:]\s*["\x27][a-zA-Z0-9_-]{20,}["\x27]'
+            'apikey\s*[=:]\s*["\x27][a-zA-Z0-9_-]{20,}["\x27]'
+
+            # Specific API patterns
+            'sk-[a-zA-Z0-9]{32,}'           # OpenAI
+            'xai-[a-zA-Z0-9]{32,}'          # xAI/Grok
+            'AIza[a-zA-Z0-9_-]{35}'         # Google API
+            'ghp_[a-zA-Z0-9]{36}'           # GitHub Personal Token
+            'gho_[a-zA-Z0-9]{36}'           # GitHub OAuth
+            'glpat-[a-zA-Z0-9_-]{20,}'      # GitLab
+
+            # Telegram
+            '[0-9]{8,10}:[a-zA-Z0-9_-]{35}' # Telegram Bot Token
+
+            # Database URLs with passwords
+            'postgresql://[^:]+:[^@]{8,}@'
+            'mysql://[^:]+:[^@]{8,}@'
+            'mongodb://[^:]+:[^@]{8,}@'
+
+            # Generic secrets
+            'secret[_-]?key\s*[=:]\s*["\x27][a-zA-Z0-9_-]{16,}["\x27]'
+            'password\s*[=:]\s*["\x27][^"\x27]{8,}["\x27]'
+            'token\s*[=:]\s*["\x27][a-zA-Z0-9_-]{20,}["\x27]'
+
+            # AWS
+            'AKIA[0-9A-Z]{16}'              # AWS Access Key
+            'aws_secret_access_key\s*[=:]\s*["\x27][a-zA-Z0-9/+=]{40}["\x27]'
+          )
+
+          FOUND=0
+
+          for pattern in "${PATTERNS[@]}"; do
+            # Search in all files except .git, node_modules, venv, __pycache__
+            MATCHES=$(grep -rniE "$pattern" . \
+              --include="*.py" \
+              --include="*.js" \
+              --include="*.ts" \
+              --include="*.json" \
+              --include="*.yml" \
+              --include="*.yaml" \
+              --include="*.env*" \
+              --include="*.md" \
+              --exclude-dir=".git" \
+              --exclude-dir="node_modules" \
+              --exclude-dir="venv" \
+              --exclude-dir="__pycache__" \
+              --exclude="*.example" \
+              2>/dev/null || true)
+
+            if [ -n "$MATCHES" ]; then
+              echo "⚠️  Potential secret found with pattern: $pattern"
+              echo "$MATCHES"
+              FOUND=1
+            fi
+          done
+
+          if [ $FOUND -eq 1 ]; then
+            echo ""
+            echo "❌ SECURITY CHECK FAILED!"
+            echo "Found potential hardcoded secrets in the codebase."
+            echo ""
+            echo "Please:"
+            echo "1. Remove secrets from code"
+            echo "2. Use environment variables instead"
+            echo "3. Add secrets to .gitignore"
+            echo "4. If this is a false positive, update the workflow patterns"
+            exit 1
+          fi
+
+          echo "✅ No hardcoded secrets detected!"
+
+      - name: Check .env files are not committed
+        run: |
+          echo "🔍 Checking for .env files with real values..."
+
+          # Find all .env files (not .env.example)
+          ENV_FILES=$(find . -name ".env" -o -name ".env.local" -o -name ".env.production" 2>/dev/null | grep -v node_modules | grep -v venv || true)
+
+          if [ -n "$ENV_FILES" ]; then
+            echo "❌ Found .env files that should not be committed:"
+            echo "$ENV_FILES"
+            echo ""
+            echo "Please add these to .gitignore!"
+            exit 1
+          fi
+
+          echo "✅ No .env files found in repository!"
+
+      - name: Validate .env.example has placeholder values
+        run: |
+          echo "🔍 Checking .env.example files..."
+
+          EXAMPLE_FILES=$(find . -name ".env.example" -o -name ".env.sample" 2>/dev/null || true)
+
+          for file in $EXAMPLE_FILES; do
+            echo "Checking $file..."
+
+            # Check for values that look like real secrets (not placeholders)
+            if grep -qE '^[A-Z_]+=[a-zA-Z0-9_-]{20,}$' "$file" 2>/dev/null; then
+              echo "⚠️  $file may contain real values instead of placeholders!"
+              grep -E '^[A-Z_]+=[a-zA-Z0-9_-]{20,}$' "$file"
+              echo ""
+              echo "Use placeholders like: API_KEY=your-api-key-here"
+              exit 1
+            fi
+          done
+
+          echo "✅ .env.example files look safe!"
+
+  python-lint:
+    name: Python syntax check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check Python syntax
+        run: |
+          echo "🔍 Checking Python syntax..."
+          find . -name "*.py" -not -path "./venv/*" -not -path "./__pycache__/*" | while read file; do
+            python -m py_compile "$file" || exit 1
+          done
+          echo "✅ All Python files have valid syntax!"
